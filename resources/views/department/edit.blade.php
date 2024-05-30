@@ -5,11 +5,9 @@
 <div class="card mt-5">
     <h2 class="card-header">Edit Department</h2>
     <div class="card-body">
-
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
             <a class="btn btn-primary btn-sm" href="{{ route('department.index') }}"><i class="fa fa-arrow-left"></i> Back</a>
         </div>
-
         <form id="editDepartmentForm" action="{{ route('departments.update', $department->id) }}" method="POST">
             @csrf
             @method('PUT')
