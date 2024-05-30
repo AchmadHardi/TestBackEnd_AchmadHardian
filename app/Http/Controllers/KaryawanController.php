@@ -11,7 +11,7 @@ use Illuminate\Http\Response;
 use Illuminate\View\View;
 use App\Http\Requests\KaryawanStoreRequest;
 use App\Http\Requests\KaryawanUpdateRequest;
-
+use Illuminate\Http\JsonResponse;
 
 class KaryawanController extends Controller
 {
@@ -23,31 +23,39 @@ class KaryawanController extends Controller
         $karyawans = Karyawan::latest()->paginate(5);
 
         return view('karyawan.index', compact('karyawans'))
-                    ->with('i', (request()->input('page', 1) - 1) * 6);
+            ->with('i', (request()->input('page', 1) - 1) * 6);
     }
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
-{
-    $jabatans = Jabatan::all();
-    return view('karyawan.create', compact('jabatans'));
-}
+    {
+        $jabatans = Jabatan::all();
+        return view('karyawan.create', compact('jabatans'));
+    }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(KaryawanStoreRequest $request): RedirectResponse
+    public function store(KaryawanStoreRequest $request): JsonResponse
     {
-        Karyawan::create($request->validated());
+        $karyawans = Karyawan::create($request->validated());
 
-        return redirect()->route('karyawan.index')
-            ->with([
-                'message' => 'data sukses dibuat',
-                'alert-type' => 'success',
-            ]);
+        if ($karyawans) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil dibuat',
+                'data' => $karyawans,
+            ], 201);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat data',
+            ], 400);
+        }
     }
+
 
     /**
      * Display the specified resource.
@@ -63,9 +71,8 @@ class KaryawanController extends Controller
     {
         // Get karyawan by ID
         $karyawan = Karyawan::findOrFail($id);
-        $jabatans = Jabatan::all(); // Jika perlu, Anda juga bisa mengambil daftar jabatan untuk digunakan dalam form edit
-
-        // Render view with karyawan data
+        $jabatans = Jabatan::all();
+        
         return view('karyawan.edit', compact('karyawan', 'jabatans'));
     }
     /**
@@ -74,30 +81,36 @@ class KaryawanController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(KaryawanUpdateRequest $request, $id): RedirectResponse
+    public function update(KaryawanUpdateRequest $request, $id): JsonResponse
     {
         $karyawan = Karyawan::findOrFail($id);
 
         $karyawan->update($request->validated());
-        return redirect()->route('karyawan.index')
-            ->with([
-                'message' => 'karyawan updated successfully',
-                'alert-type' => 'warning',
-            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Karyawan updated successfully',
+            'data' => $karyawan,
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): RedirectResponse
+    public function destroy(string $id): JsonResponse
     {
         $karyawan = Karyawan::findOrFail($id);
-        $karyawan->delete();
 
-        return redirect()->route('karyawan.index')
-            ->with([
+        if ($karyawan->delete()) {
+            return response()->json([
+                'success' => true,
                 'message' => 'karyawan deleted successfully',
-                'alert-type' => 'success',
             ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete karyawan',
+            ], 500);
+        }
     }
 }

@@ -11,6 +11,7 @@ use Illuminate\Http\Response;
 use Illuminate\View\View;
 use App\Http\Requests\JabatanStoreRequest;
 use App\Http\Requests\JabatanUpdateRequest;
+use Illuminate\Http\JsonResponse;
 
 class JabatanController extends Controller
 {
@@ -31,21 +32,28 @@ class JabatanController extends Controller
     public function create()
     {
         $levels = Level::all();
-        return view('jabatan.create', compact('jabatans'));
+        return view('jabatan.create', compact('levels'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(JabatanStoreRequest $request): RedirectResponse
+    public function store(JabatanStoreRequest $request): JsonResponse
     {
-        Jabatan::create($request->validated());
+        $jabatan = Jabatan::create($request->validated());
 
-        return redirect()->route('jabatan.index')
-            ->with([
-                'message' => 'data sukses dibuat',
-                'alert-type' => 'success',
-            ]);
+        if ($jabatan) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil dibuat',
+                'data' => $jabatan,
+            ], 201);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat data',
+            ], 400);
+        }
     }
 
     /**
@@ -73,30 +81,35 @@ class JabatanController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(JabatanUpdateRequest $request, $id): RedirectResponse
+    public function update(JabatanUpdateRequest $request, string $id): JsonResponse
     {
-        $jabatans = Jabatan::findOrFail($id);
+        $jabatan = Jabatan::findOrFail($id);
 
-        $jabatans->update($request->validated());
-        return redirect()->route('jabatan.index')
-            ->with([
-                'message' => 'jabatan updated successfully',
-                'alert-type' => 'warning',
-            ]);
+        $jabatan->update($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Jabatan updated successfully',
+            'data' => $jabatan,
+        ]);
     }
-
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): RedirectResponse
+    public function destroy(string $id): JsonResponse
     {
-        $jabatans = Jabatan::findOrFail($id);
-        $jabatans->delete();
+        $jabatan = Jabatan::findOrFail($id);
 
-        return redirect()->route('jabatan.index')
-            ->with([
-                'message' => 'jabatan deleted successfully',
-                'alert-type' => 'success',
+        if ($jabatan->delete()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Jabatan deleted successfully',
             ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete jabatan',
+            ], 500);
+        }
     }
 }

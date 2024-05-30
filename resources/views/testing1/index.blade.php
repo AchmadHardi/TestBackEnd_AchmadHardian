@@ -53,7 +53,7 @@
         }
 
         function generateOutput() {
-            let type = document.getElementById('type').value;
+            let type = document.getElementById('type').value;   
             let input = document.getElementById('input').value;
             let value = parseInt(input);
             let result = '';

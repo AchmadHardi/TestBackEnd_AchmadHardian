@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 use Illuminate\View\View;
 use App\Http\Requests\DepartmentStoreRequest;
 use App\Http\Requests\DepartmentUpdateRequest;
+use Illuminate\Http\JsonResponse;
 
 class DepartmentController extends Controller
 {
@@ -35,15 +36,22 @@ class DepartmentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(DepartmentStoreRequest $request): RedirectResponse
+    public function store(DepartmentStoreRequest $request): JsonResponse
     {
-        Department::create($request->validated());
+        $department = Department::create($request->validated());
 
-        return redirect()->route('department.index')
-            ->with([
-                'message' => 'data sukses dibuat',
-                'alert-type' => 'success',
-            ]);
+        if ($department) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil dibuat',
+                'data' => $department,
+            ], 201);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat data',
+            ], 400);
+        }
     }
 
     /**
@@ -51,50 +59,51 @@ class DepartmentController extends Controller
      */
     public function show(string $id)
     {
-     
+
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id): View
+    public function edit(string $id)
     {
-        //get product by ID
-        $departments = Department::findOrFail($id);
-
-        //render view with product
-        return view('department.edit', compact('departments'));
+        $department = Department::findOrFail($id);
+        return view('department.edit', compact('department'));
     }
-    /**
-     * Update the specified resource in storage.
-     */
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(DepartmentUpdateRequest $request, $id): RedirectResponse
-    {
-        $departments = Department::findOrFail($id);
 
-        $departments->update($request->validated());
-        return redirect()->route('department.index')
-            ->with([
-                'message' => 'Department updated successfully',
-                'alert-type' => 'warning',
-            ]);
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(DepartmentUpdateRequest $request, $id): JsonResponse
+    {
+        $department = Department::findOrFail($id);
+
+        $department->update($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Department updated successfully',
+            'data' => $department,
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): RedirectResponse
+    public function destroy(string $id): JsonResponse
     {
         $department = Department::findOrFail($id);
-        $department->delete();
 
-        return redirect()->route('department.index')
-            ->with([
+        if ($department->delete()) {
+            return response()->json([
+                'success' => true,
                 'message' => 'Department deleted successfully',
-                'alert-type' => 'success',
             ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete department',
+            ], 500); 
+        }
     }
 }

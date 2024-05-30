@@ -10,7 +10,7 @@
         <a class="btn btn-primary btn-sm" href="{{ route('karyawan.index') }}"><i class="fa fa-arrow-left"></i> Back</a>
     </div>
 
-    <form action="{{ route('karyawans.update', $karyawan->id) }}" method="POST">
+    <form id="editKaryawanForm" action="{{ route('karyawans.update', $karyawan->id) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -79,10 +79,34 @@
                 <div class="form-text text-danger">{{ $message }}</div>
             @enderror
         </div>
-
         <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i> Update</button>
     </form>
 
   </div>
 </div>
+@endsection
+
+@section('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#updateKaryawanBtn').click(function() {
+            var formData = $('#editKaryawanForm').serialize();
+            $.ajax({
+                type: 'PUT',
+                url: $('#editKaryawanForm').attr('action'),
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    console.log(response);
+                    alert('Data berhasil diperbarui!');
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                    alert('Terjadi kesalahan saat memperbarui data!');
+                }
+            });
+        });
+    });
+</script>
 @endsection

@@ -10,7 +10,7 @@ use Illuminate\Http\Response;
 use Illuminate\View\View;
 use App\Http\Requests\LevelStoreRequest;
 use App\Http\Requests\LevelUpdateRequest;
-
+use Illuminate\Http\JsonResponse;
 class LevelController extends Controller
 {
     /**
@@ -35,15 +35,22 @@ class LevelController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(LevelStoreRequest $request): RedirectResponse
+    public function store(LevelStoreRequest $request): JsonResponse
     {
-        Level::create($request->validated());
+        $level = Level::create($request->validated());
 
-        return redirect()->route('level.index')
-            ->with([
-                'message' => 'data sukses dibuat',
-                'alert-type' => 'success',
-            ]);
+        if ($level) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil dibuat',
+                'data' => $level,
+            ], 201);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat data',
+            ], 400);
+        }
     }
 
     /**
@@ -71,30 +78,37 @@ class LevelController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(LevelUpdateRequest $request, $id): RedirectResponse
+    public function update(LevelUpdateRequest $request, $id): JsonResponse
     {
-        $levels = Level::findOrFail($id);
+        $level = Level::findOrFail($id);
 
-        $levels->update($request->validated());
-        return redirect()->route('level.index')
-            ->with([
-                'message' => 'Level updated successfully',
-                'alert-type' => 'warning',
-            ]);
+        $level->update($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Level updated successfully',
+            'data' => $level,
+        ]);
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): RedirectResponse
+    public function destroy(string $id): JsonResponse
     {
-        $levels = Level::findOrFail($id);
-        $levels->delete();
+        $level = Level::findOrFail($id);
 
-        return redirect()->route('level.index')
-            ->with([
-                'message' => 'Department deleted successfully',
-                'alert-type' => 'success',
+        if ($level->delete()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Level deleted successfully',
             ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete level',
+            ], 500);
+        }
     }
 }

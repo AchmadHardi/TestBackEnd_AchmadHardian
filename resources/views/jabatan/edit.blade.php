@@ -10,7 +10,7 @@
         <a class="btn btn-primary btn-sm" href="{{ route('jabatan.index') }}"><i class="fa fa-arrow-left"></i> Back</a>
     </div>
 
-    <form action="{{ route('jabatans.update', $jabatan->id) }}" method="POST">
+    <form id="editJabatanForm" action="{{ route('jabatans.update', $jabatan->id) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -40,10 +40,36 @@
                 <div class="form-text text-danger">{{ $message }}</div>
             @enderror
         </div>
-
         <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i> Update</button>
     </form>
 
   </div>
 </div>
+@endsection
+
+@section('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#editJabatanForm').submit(function(event) {
+            event.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                type: 'PUT',
+                url: $(this).attr('action'),
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    console.log(response);
+                    alert('Data berhasil diperbarui!');
+                    window.location.href = "{{ route('level.index') }}";
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                    alert('Terjadi kesalahan saat memperbarui data!');
+                }
+            });
+        });
+    });
+</script>
 @endsection

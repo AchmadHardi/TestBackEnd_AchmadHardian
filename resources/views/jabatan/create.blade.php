@@ -10,7 +10,7 @@
         <a class="btn btn-primary btn-sm" href="{{ route('jabatan.index') }}"><i class="fa fa-arrow-left"></i> Back</a>
     </div>
 
-    <form action="{{ route('jabatans.store') }}" method="POST">
+    <form id="jabatanForm" action="{{ route('jabatans.store') }}" method="POST">
         @csrf
 
         <div class="mb-3">
@@ -38,10 +38,36 @@
                 <div class="form-text text-danger">{{ $message }}</div>
             @enderror
         </div>
-
         <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i> Submit</button>
     </form>
 
   </div>
 </div>
+
+@endsection
+
+@section('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#jabatanForm').submit(function(event) {
+            event.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    console.log(response);
+                    alert('Data berhasil ditambahkan!');
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                    alert('Terjadi kesalahan saat menambahkan data!');
+                }
+            });
+        });
+    });
+</script>
 @endsection

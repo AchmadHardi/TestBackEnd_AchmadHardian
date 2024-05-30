@@ -10,7 +10,7 @@
         <a class="btn btn-primary btn-sm" href="{{ route('department.index') }}"><i class="fa fa-arrow-left"></i> Back</a>
     </div>
 
-    <form action="{{ route('departments.store') }}" method="POST">
+    <form id="departmentForm" action="{{ route('departments.store') }}" method="POST">
         @csrf
 
         <div class="mb-3">
@@ -30,4 +30,31 @@
 
   </div>
 </div>
+
+@endsection
+
+@section('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#departmentForm').submit(function(event) {
+            event.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    console.log(response);
+                    alert('Data berhasil ditambahkan!');
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                    alert('Terjadi kesalahan saat menambahkan data!');
+                }
+            });
+        });
+    });
+</script>
 @endsection
